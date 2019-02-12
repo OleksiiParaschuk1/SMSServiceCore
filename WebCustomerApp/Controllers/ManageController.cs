@@ -38,7 +38,7 @@ namespace WebCustomerApp.Controllers
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _emailSender = new EmailSender();
+            _emailSender = emailSender;
             _logger = logger;
             _urlEncoder = urlEncoder;
         }

@@ -1,0 +1,33 @@
+﻿@model WebCustomerApp.Models.MessageViewModels.MessageModel
+
+
+@{
+    ViewBag.Title = "AddNewMessage";
+}
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div>
+        <h4>AddNewMessage</h4>
+        <hr />
+        @Html.ValidationSummary(false)
+
+        <div>
+            TextOfMessage
+            <div>
+                @Html.EditorFor(model => model.TextOfMessage)
+            </div>
+        </div>
+
+        <div>
+            <div>
+                <input type="submit" value="Add Message" />
+            </div>
+        </div>
+    </div>
+}
+
+

@@ -6,12 +6,17 @@
   </PropertyGroup>
 
 
-
-
   <ItemGroup>
     <ProjectReference Include="..\BAL\BAL.csproj" />
     <ProjectReference Include="..\DAL\DAL.csproj" />
     <ProjectReference Include="..\Model\Model.csproj" />
+  </ItemGroup>
+
+
+
+
+  <ItemGroup>
+    <Folder Include="Views\Message\" />
   </ItemGroup>
 
 </Project>
