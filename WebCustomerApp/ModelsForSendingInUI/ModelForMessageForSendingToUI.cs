@@ -11,7 +11,7 @@ namespace WebApp.ModelsForSendingInUI
         public Message Message;
         public List<Phone> Phones;
 
-        ModelForMessageForSendingToUI(Message message, List<Phone> phones)
+        public ModelForMessageForSendingToUI(Message message, List<Phone> phones)
         {
             Message = message;
             Phones = phones;

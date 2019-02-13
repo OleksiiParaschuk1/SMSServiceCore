@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using WebApp.ModelsForSendingInUI;
 using WebCustomerApp.BAL.Interfaces;
 using WebCustomerApp.BAL.Repository;
 using WebCustomerApp.Data;
@@ -30,30 +31,34 @@ namespace WebApp.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetMessages()
+        public ActionResult Messages()
         {
-            ViewBag.Messages = _unitOfWork._messageRepository.GetMessagesBySenderId(_unitOfWork._userManager.GetUserId(User));
-            ViewBag.Recepients = _unitOfWork._recepientMessageRepository.GetRecepientsMessagesByMessageId();
-            return View();
-        }
-
-        [HttpGet]
-        public ActionResult AddNewMessage()
-        {
+            List<ModelForMessageForSendingToUI> messagesWithRecipients = new List<ModelForMessageForSendingToUI>();
+            List<Message> messages = _unitOfWork._messageRepository.GetMessagesBySenderId(_unitOfWork._userManager.GetUserId(User));
+            foreach (var mes in messages)
+            {
+                List<Phone> phones = new List<Phone>();
+                List<RecepientMessage> recepientMessages = _unitOfWork._recepientMessageRepository.GetRecepientsMessagesByMessageId(mes.MessageId);
+                foreach (var recepientMes in recepientMessages)
+                {
+                    phones.Add(_unitOfWork._phoneRepository.GetById(recepientMes.PhoneId));
+                }
+                messagesWithRecipients.Add(new ModelForMessageForSendingToUI(mes, phones));
+            }
+            ViewBag.MessagesWithRecipients = messagesWithRecipients;
             return View();
         }
 
         [HttpPost]
-        public ActionResult AddNewMessage(MessageModel messageModel)
+        public ActionResult Messages(MessageModel messageModel)
         {
             Message message = new Message();
             message.SenderId = _unitOfWork._userManager.GetUserId(User);
             message.TextOfMessage = messageModel.TextOfMessage;
             _unitOfWork._messageRepository.Create(message);
             _unitOfWork.SaveChanges();
-            return RedirectToAction("GetMessages");
+            return RedirectToAction("Messages");
         }
-
 
     }
 }

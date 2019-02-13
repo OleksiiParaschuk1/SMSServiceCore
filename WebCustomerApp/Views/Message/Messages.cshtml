@@ -1,0 +1,146 @@
+﻿@model WebCustomerApp.Models.MessageViewModels.MessageModel
+@{
+    ViewBag.Title = "Messages";
+}
+
+<style type="text/css" media="all">
+
+    table {
+        font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+        font-size: 14px;
+        border-radius: 10px;
+        border-spacing: 0;
+        text-align: center;
+    }
+
+    th {
+        background: #BCEBDD;
+        color: white;
+        text-shadow: 0 1px 1px #2D2020;
+        padding: 10px 20px;
+    }
+
+    th, td {
+        border-style: solid;
+        border-width: 0 1px 1px 0;
+        border-color: white;
+    }
+
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+
+        th:first-child {
+            border-top-left-radius: 10px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 10px;
+            border-right: none;
+        }
+
+    td {
+        padding: 10px 20px;
+        background: #F8E391;
+    }
+
+    tr:last-child td:first-child {
+        border-radius: 0 0 0 10px;
+    }
+
+    tr:last-child td:last-child {
+        border-radius: 0 0 10px 0;
+    }
+
+    tr td:last-child {
+        border-right: none;
+    }
+</style>
+
+<section>
+    <h4>Messages</h4>
+    <table style="display: inline-block;" border="1">
+        <tr>
+            <td><p>Text</p></td>
+            <td><p>Recepients</p></td>
+        </tr>
+        @foreach (var mes in ViewBag.MessagesWithRecipients)
+        {
+        <tr>
+            <td><p>@mes.Message.TextOfMessage</p></td>
+            <td>
+                <ul>
+                    @foreach (var phone in mes.Phones)
+                    {
+                        <li>@phone.PhoneNumber</li>
+                    }
+                </ul>
+            </td>
+        </tr>
+        }
+    </table>
+
+    <table align="right" style="display: inline-block;" border="1">
+        <tr>
+            <td>
+                <form id="Myform" style="display: inline-block;">
+                    <div id="recepient">
+                        Recepients
+                        <div id="recepientEditor">
+                            @Html.EditorFor(model => model.TextOfMessage)
+                        </div>
+                    </div>
+
+                    <div>
+                        <input type="button" id="addRecepient" value="Add Recepient" />
+                    </div>
+                </form>
+            </td>
+        </tr>
+    </table>
+    <table align="right" style="display: inline-block;" border="1">
+        <tr>
+            <td>
+                <form id="Myform" style="display: inline-block;">
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
+                        <h4>AddNewMessage</h4>
+                        @Html.ValidationSummary(false)
+
+                        <div>
+                            TextOfMessage
+                            <div>
+                                @Html.EditorFor(model => model.TextOfMessage)
+                            </div>
+                        </div>
+
+                        <div>
+                            <div>
+                                <input type="submit" value="Add Message" />
+                            </div>
+                        </div>
+                    }
+                </form>
+            </td>
+        </tr>
+    </table>
+
+    <script type="text/javascript">
+        {
+            var prototype = document.getElementById("recepientEditor");
+        }
+    </script>
+
+    <script type="text/javascript">
+        document.getElementById("addRecepient").onclick = function () {
+            var form = document.getElementById("Myform");
+            var input = prototype.cloneNode(true);
+            var br = document.createElement("br");
+            var btn = document.getElementById("addRecepient");
+            form.appendChild(input);
+            form.appendChild(btn);
+        }
+    </script>
+</section>
+

@@ -11,5 +11,6 @@ namespace WebCustomerApp.Models.MessageViewModels
     {
         [Required]
         public string TextOfMessage { get; set; }
+
     }
 }
