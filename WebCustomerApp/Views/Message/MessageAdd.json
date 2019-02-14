@@ -1,0 +1,14 @@
+document.getElementById("sendMessage").onclick = function () {
+            var input = document.getElementById("messageEditor")
+            var Message = {};
+            Message.TextOfMessage = input.value;
+            Message.Recepients = phones;
+
+            $.ajax({
+                url: '/Message/Messages',
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                type: 'POST',
+                data: JSON.stringify(Message)
+            });
+                }

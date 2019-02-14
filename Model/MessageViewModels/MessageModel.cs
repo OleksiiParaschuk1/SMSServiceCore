@@ -9,8 +9,8 @@ namespace WebCustomerApp.Models.MessageViewModels
 {
     public class MessageModel
     {
-        [Required]
         public string TextOfMessage { get; set; }
 
+        public List<string> Recepients { get; set; }
     }
 }
