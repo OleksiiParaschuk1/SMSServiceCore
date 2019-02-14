@@ -14,7 +14,6 @@ namespace WebCustomerApp.BAL.Interfaces
         IMessageRepository _messageRepository { get; }
         IRecepientMessageRepository _recepientMessageRepository { get; }
         IPhoneRepository _phoneRepository { get; }
-        IAdditionalInfoRepository _additionalInfoRepository { get; }
 
         void SaveChanges();
     }

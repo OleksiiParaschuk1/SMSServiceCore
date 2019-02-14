@@ -56,6 +56,36 @@ namespace WebApp.Controllers
             message.SenderId = _unitOfWork._userManager.GetUserId(User);
             message.TextOfMessage = messageModel.TextOfMessage;
             _unitOfWork._messageRepository.Create(message);
+            List<Phone> phones = _unitOfWork._phoneRepository.GetPhonesByUserId(_unitOfWork._userManager.GetUserId(User));
+            List<Phone> recepients = new List<Phone>();
+            List<Phone> newphones = new List<Phone>();
+            foreach (var recepient in messageModel.Recepients)
+            {
+                Phone phone = phones.Find(item => item.PhoneNumber == recepient);
+                if (phone != null)
+                {
+                    recepients.Add(phone);
+                }
+                else
+                {
+                    phone = new Phone();
+                    phone.PhoneNumber = recepient;
+                    phone.UserId = _unitOfWork._userManager.GetUserId(User);
+                    newphones.Add(phone);
+                }
+            }
+            foreach(var newphone in newphones)
+            {
+                _unitOfWork._phoneRepository.Create(newphone);
+                recepients.Add(newphone);
+            }
+            foreach (var recepient in recepients)
+            {
+                RecepientMessage recepientMessage = new RecepientMessage();
+                recepientMessage.MessageId = message.MessageId;
+                recepientMessage.PhoneId = recepient.PhoneId;
+                _unitOfWork._recepientMessageRepository.Create(recepientMessage);
+            }
             _unitOfWork.SaveChanges();
             return RedirectToAction("Messages");
         }

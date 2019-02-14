@@ -92,13 +92,14 @@
                 <form id="Myform" style="display: inline-block;">
                     <div id="recepient">
                         Recepients
-                        <div>
-                            <input type="text" id="recepientEditor">
+                        <div class="form-group">
+                            <input asp-for="Recepients" class="form-control" type="text" id="recepientEditor">
+                            <span asp-validation-for="Recepients" id="alert" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div>
-                        <input type="button" id="addRecepient" value="Add Recepient" />
+                        <input type="button" onclick="AddRecepientFunc()" id="addRecepient" value="Add Recepient" />
                     </div>
                 </form>
             </td>
@@ -125,7 +126,7 @@
 
                     <div>
                         <div>
-                            <input type="submit" value="Add Message"  id="sendMessage"/>
+                            <input type="submit" onclick="SendMessage()" value="Add Message" id="sendMessage" />
                         </div>
                     </div>
                 </form>
@@ -134,19 +135,28 @@
     </table>
 
     <script type="text/javascript">
-        document.getElementById("addRecepient").onclick = function () {
+            function AddRecepientFunc() {
             var input = document.getElementById("recepientEditor")
-            phones.push(input.value);
-            var textarea = document.getElementById("phones");
-            textarea.textContent += input.value + "\n";
-            input.value = "";
+            var span = document.getElementById("alert");
+            span.textContent = "";
+            var re = new RegExp("^[+][0-9]{12}");
+            if (re.test(input.value)) {
+                phones.push(input.value);
+                var textarea = document.getElementById("phones");
+                textarea.textContent += input.value + "\n";
+                input.value = "";
+            }
+            else
+            {
+                span.textContent = "Wrong format of phone number";
+            }
         }
 
 
 
     </script>
     <script type="text/javascript">
-        document.getElementById("sendMessage").onclick = function () {
+            function SendMessage() {
             var input = document.getElementById("messageEditor")
             var Message = {};
             Message.TextOfMessage = input.value;
@@ -159,7 +169,7 @@
                 type: 'POST',
                 data: Message
             });
-                }
+        }
     </script>
-</section >
+</section>
 

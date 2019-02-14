@@ -10,5 +10,6 @@ namespace WebCustomerApp.BAL.Interfaces
 {
     public interface IPhoneRepository : IRepository<Phone>
     {
+        List<Phone> GetPhonesByUserId(string userId);
     }
 }

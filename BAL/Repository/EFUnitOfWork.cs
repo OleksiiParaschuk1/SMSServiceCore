@@ -16,17 +16,15 @@ namespace WebCustomerApp.BAL.Repository
         public IMessageRepository _messageRepository { get; }
         public IRecepientMessageRepository _recepientMessageRepository { get; }
         public IPhoneRepository _phoneRepository { get; }
-        public IAdditionalInfoRepository _additionalInfoRepository { get; }
 
 
         public EFUnitOfWork(UserManager<ApplicationUser> userManager, IMessageRepository messageRepository, IRecepientMessageRepository recepientMessageRepository,
-            IPhoneRepository phoneRepository, IAdditionalInfoRepository additionalInfoRepository)
+            IPhoneRepository phoneRepository)
         {
             _userManager = userManager;
             _messageRepository = messageRepository;
             _recepientMessageRepository = recepientMessageRepository;
             _phoneRepository = phoneRepository;
-            _additionalInfoRepository = additionalInfoRepository;
         }
 
         public void SaveChanges()
@@ -34,7 +32,6 @@ namespace WebCustomerApp.BAL.Repository
             _messageRepository.SaveChanges();
             _recepientMessageRepository.SaveChanges();
             _phoneRepository.SaveChanges();
-            _additionalInfoRepository.SaveChanges();
         }
     }
 }
