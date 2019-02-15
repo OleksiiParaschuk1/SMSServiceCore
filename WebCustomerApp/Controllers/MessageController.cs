@@ -87,7 +87,8 @@ namespace WebApp.Controllers
                 _unitOfWork._recepientMessageRepository.Create(recepientMessage);
             }
             _unitOfWork.SaveChanges();
-            return RedirectToAction("Messages");
+
+            return Json(new { message.MessageId });
         }
 
     }

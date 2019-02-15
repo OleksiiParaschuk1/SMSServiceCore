@@ -65,14 +65,14 @@
 
 <section>
     <h4>Messages</h4>
-    <table style="display: inline-block;" border="1">
+    <table style="display: inline-block;" border="1" id="messagesTable">
         <tr>
             <td><p>Text</p></td>
             <td><p>Recepients</p></td>
         </tr>
         @foreach (var mes in ViewBag.MessagesWithRecipients)
         {
-            <tr>
+            <tr id="@mes.Message.MessageId">
                 <td><p>@mes.Message.TextOfMessage</p></td>
                 <td>
                     <ul>
@@ -99,7 +99,7 @@
                     </div>
 
                     <div>
-                        <input type="button" onclick="AddRecepientFunc()" id="addRecepient" value="Add Recepient" />
+                        <input type="button" class="btn btn-primary" onclick="AddRecepientFunc()" id="addRecepient" value="Add Recepient" />
                     </div>
                 </form>
             </td>
@@ -114,19 +114,20 @@
                     <div>
                         TextOfMessage
                         <div>
-                            <input type="text" id="messageEditor">
+                            <input type="text" class="form-control" id="messageEditor">
                         </div>
                     </div>
 
                     <div>
                         <div>
-                            <textarea id="phones" value="Add Message" rows="15"></textarea>
+                            <select multiple class="form-control" id="phones"></select>
                         </div>
                     </div>
 
                     <div>
-                        <div>
-                            <input type="submit" onclick="SendMessage()" value="Add Message" id="sendMessage" />
+                        <div class="btn-group">
+                            <input type="submit" class="btn btn-primary" onclick="SendMessage()" value="Add Message" id="sendMessage" />
+                            <input type="button" class="btn btn-primary" onclick="DeleteRecipientFunc()" id="deleteRecipient" value="Delete recipient" />
                         </div>
                     </div>
                 </form>
@@ -135,40 +136,78 @@
     </table>
 
     <script type="text/javascript">
-            function AddRecepientFunc() {
+        function AddRecepientFunc() {
             var input = document.getElementById("recepientEditor")
             var span = document.getElementById("alert");
             span.textContent = "";
             var re = new RegExp("^[+][0-9]{12}");
             if (re.test(input.value)) {
                 phones.push(input.value);
-                var textarea = document.getElementById("phones");
-                textarea.textContent += input.value + "\n";
+                var select = document.getElementById("phones");
+                var option = document.createElement("option");
+                option.text = input.value;
+                select.add(option);
+                //textarea.textContent += input.value + "\n";
                 input.value = "";
             }
-            else
-            {
+            else {
                 span.textContent = "Wrong format of phone number";
             }
         }
-
-
-
     </script>
+
     <script type="text/javascript">
-            function SendMessage() {
+        function DeleteRecipientFunc() {
+            var text = $("#phones option:selected").text();
+            for (var i = 0; i < phones.length; i++) {
+                if (phones[i] == text)
+                    phones.splice(i, 1);
+            }
+            $("#phones option:selected").remove();
+        }
+    </script>
+
+    <script type="text/javascript">
+        function SendMessage() {
             var input = document.getElementById("messageEditor")
             var Message = {};
             Message.TextOfMessage = input.value;
             Message.Recepients = phones;
 
+            var id;
             $.ajax({
                 url: '/Message/Messages',
                 //contentType: 'application/json; charset=utf-8',
                 //dataType: 'json',
                 type: 'POST',
-                data: Message
+                data: Message,
+                success: function (data)
+                {
+                    id = data;
+                },
+                error: function () {
+                    alert('error');
+                }
             });
+
+            var table = document.getElementById("messagesTable");
+            var tr = document.createElement("tr");
+            table.append(tr);
+            var tdformessage = document.createElement("td");
+            tr.append(tdformessage);
+            var p = document.createElement("p");
+            p.textContent = Message.TextOfMessage;
+            tdformessage.append(p);
+            var tdforphone = document.createElement("td");
+            tr.append(tdforphone);
+            var ul = document.createElement("ul");
+            tdforphone.append(ul);
+            for (var i = 0; i < Message.Recepients.length; i++) {
+                var li = document.createElement("li");
+                li.textContent = Message.Recepients[i];
+                ul.append(li);
+            }
+
         }
     </script>
 </section>
