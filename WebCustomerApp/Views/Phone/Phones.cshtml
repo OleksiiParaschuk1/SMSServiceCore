@@ -8,15 +8,64 @@
             crossorigin="anonymous"></script>
 
     <script>
+        var allphones;
+        var phonesCount;
+        var currentPage = 1;
+        var searchValue ="";
 
-        $(document).ready(function () {
+        $(document).ready(GetPhoneData());
+
+        function GetPhoneData() {
+            getPhonesCount();
             getPhoneList();
-        });
+        }
 
         var Phone = {
             id: 0,
             PhoneNumber: "",
             FullName: ""
+        }
+
+        function getPhonesCount() {
+            $.ajax({
+                url: '/Phone/GetPhonesCount/',
+                type: 'GET',
+                success: function (count) {
+                    phonesCount = count;
+                    buildNavigationButtons();
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+
+        function nextPhonePage() {
+            if (phonesCount % 10 == 0) {
+                if (currentPage < phonesCount / 10) {
+                    currentPage++;
+                    getPhoneList();
+                }
+            }
+            else
+                if (currentPage < (phonesCount / 10) + 1) {
+                    currentPage++;
+                    getPhoneList();
+                }
+        }
+
+        function previousPhonePage() {
+            if (currentPage > 1) {
+                currentPage--;
+                getPhoneList();
+            }
+        }
+
+        function getPhonePageByNumber(item) {
+            var numberOfPage = item.id;
+            numberOfPage = numberOfPage.substr(4);
+            currentPage = parseInt(numberOfPage, 10);
+            getPhoneList();
         }
 
         // Get all Phones to display
@@ -25,7 +74,9 @@
             $.ajax({
                 url: '/Phone/GetPhones/',
                 type: 'GET',
+                data: { numberOfPage: currentPage },
                 success: function (phones) {
+                    allphones = phones;
                     phoneListSuccess(phones);
                 },
                 error: function (request, message, error) {
@@ -59,22 +110,22 @@
         // Build a <tr> for a row of table data
         function phoneBuildTableRow(phone) {
             var newRow = "<tr>" +
-                "<td><input   class='input-phone' type='text' value='" + phone.phoneNumber + "'/></td>" +
-                "<td><input  class='input-fullname'  type='text' value='" + phone.fullName + "'/></td>" +
+                "<td><input   class='input_phone' type='text' readonly='true' value='" + phone.phoneNumber + "'/></td>" +
+                "<td><input  class='input_fullname'  type='text' readonly='false' value='" + phone.fullName + "'/></td>" +
                 "<td>" +
                 "<button type='button' " +
-                "onclick='phoneUpdate(this);' " +
+                "onclick='phoneEditAllow(this);' " +
                 "class='btn btn-default' " +
-                "data-id='" + phone.id + "' " +
-                "data-name='" + phone.phoneNumber + "' " +
-                "data-gender='" + phone.fullName + "' " +
+                "data-id='" + phone.phoneId + "' " +
+                "data-phonenumber='" + phone.phoneNumber + "' " +
+                "data-fullname='" + phone.fullName + "' " +
                 ">" +
                 "<span class='glyphicon glyphicon-edit' /> Update" +
                 "</button> " +
                 " <button type='button' " +
                 "onclick='phoneDelete(this);'" +
                 "class='btn btn-default' " +
-                "data-id='" + phone.id + "'>" +
+                "data-id='" + phone.phoneId + "'>" +
                 "<span class='glyphicon glyphicon-remove' />Delete" +
                 "</button>" +
                 "</td>" +
@@ -94,13 +145,25 @@
             options.data = obj;
 
             options.success = function (msg) {
-                getPhoneList();
                 $("#msg").html(msg);
+                GetPhoneData();
             },
                 options.error = function () {
                     $("#msg").html("Error while calling the Web API!");
                 };
             $.ajax(options);
+            $("#phonenumber").val("");
+            $("#fullname").val("");
+        }
+
+        function phoneEditAllow(item) {
+            item.removeChild(item.firstChild);
+            item.textContent = "";
+            $(item).append("<span class='glyphicon glyphicon-floppy-disk' /> Save");
+            $(".input_phone", $(item).parent().parent())[0].readOnly = false;
+            $(".input_fullname", $(item).parent().parent())[0].readOnly = false;
+            item.setAttribute("onclick", "phoneUpdate(this)");
+
         }
 
         function phoneUpdate(item) {
@@ -111,8 +174,8 @@
 
             var obj = Phone;
             obj.id = $(item).data("id");
-            obj.PhoneNumber = $(".input-phone", $(item).parent().parent()).val();
-            obj.FullName = $(".input-fullname", $(item).parent().parent()).val();
+            obj.PhoneNumber = $(".input_phone", $(item).parent().parent()).val();
+            obj.FullName = $(".input_fullname", $(item).parent().parent()).val();
             console.dir(obj);
             options.data = obj;
             options.success = function (msg) {
@@ -122,6 +185,12 @@
                 $("#msg").html("Error while calling the Web API!");
             };
             $.ajax(options);
+            item.removeChild(item.firstChild);
+            item.textContent = "";
+            $(item).append("<span class='glyphicon glyphicon-edit' /> Update");
+            $(".input_phone", $(item).parent().parent())[0].readOnly = true;
+            $(".input_fullname", $(item).parent().parent())[0].readOnly = true;
+            item.setAttribute("onclick", "phoneEditAllow(this)");
         }
 
         function phoneDelete(item) {
@@ -133,7 +202,9 @@
             options.success = function (msg) {
                 console.log('msg= ' + msg);
                 $("#msg").html(msg);
-                getPhoneList();
+                if ((phonesCount - 1) % 10 == 0)
+                    currentPage--;
+                GetPhoneData();
             };
             options.error = function () {
                 $("#msg").html("Error while calling the Web API!");
@@ -151,6 +222,105 @@
 
             alert(msg);
         }
+
+        function getSearchPhones() {
+            $.ajax({
+                url: '/Phone/Search/',
+                type: 'GET',
+                data: {
+                    searchData: searchValue,
+                    numberOfPage: currentPage
+                },
+                success: function (phones) {
+                    phoneListSuccess(phones);
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+
+        function getNumberOfSearchPhones() {
+            $.ajax({
+                url: '/Phone/GetNumberOfSearchPhones/',
+                type: 'GET',
+                data: {
+                    searchData: searchValue,
+                },
+                success: function (count) {
+                    phonesCount = count;
+                    getSearchPhones();
+                    buildNavigationButtons();
+                    var btn = document.getElementById("previousPage");
+                    btn.setAttribute("onclick", "previousSearchPhonePage()");
+                    btn = document.getElementById("nextPage");
+                    btn.setAttribute("onclick", "nextSearchPhonePage()");
+                    var pageButtons = document.getElementById("pageButtons");
+                    for (var i = 1; i < pageButtons.children.length - 1; i++) {
+                        btn = pageButtons.children[i];
+                        btn.setAttribute("onclick", "getSearchPhonePageByNumber(this)");
+                    }
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+
+        function nextSearchPhonePage() {
+            if (phonesCount % 10 == 0) {
+                if (currentPage < phonesCount / 10) {
+                    currentPage++;
+                    getSearchPhones();
+                }
+            }
+            else
+                if (currentPage < (phonesCount / 10) + 1) {
+                    currentPage++;
+                    getSearchPhones();
+                }
+        }
+
+        function previousSearchPhonePage() {
+            if (currentPage > 1) {
+                currentPage--;
+                getSearchPhones();
+            }
+        }
+
+        function getSearchPhonePageByNumber(item) {
+            var numberOfPage = item.id;
+            numberOfPage = numberOfPage.substr(4);
+            currentPage = parseInt(numberOfPage, 10);
+            getSearchPhones();
+        }
+
+        function searchPhones() {
+            searchValue = $("#searchField").val();
+            if (searchValue == "") {
+                getPhonesCount();
+                GetPhoneData();
+                return;
+            }
+            currentPage = 1;
+            getNumberOfSearchPhones();
+        }
+
+        function buildNavigationButtons() {
+            if (phonesCount % 10 == 0)
+                pagesCount = phonesCount / 10;
+            else
+                var pagesCount = phonesCount / 10 + 1;
+            $("#pageButtons button").remove();
+            var button = "<button type='button' class='btn btn -default ' onclick='previousPhonePage()' id='previousPage'><span class='glyphicon glyphicon-triangle-left' /></button>"
+            $("#pageButtons").append(button);
+            for (var i = 1; i <= pagesCount; i++) {
+                button = "<button type='button' class='btn btn -default' onclick='getPhonePageByNumber(this)' id='Page" + i + "'>" + i + "</button>";
+                $("#pageButtons").append(button);
+            }
+            button = "<button type='button' class='btn btn -default ' onclick='nextPhonePage()' id='nextPage'><span class='glyphicon glyphicon-triangle-right' /></button>";
+            $("#pageButtons").append(button);
+        }
     </script>
 
 </head>
@@ -167,9 +337,20 @@
                 <tr>
                     <td><input id="phonenumber" type="text" /></td>
                     <td><input id="fullname" type="text" /></td>
-                    <td><input type="button" id="insert" value="Insert" onclick='onAddPhone(this)' /></td>
+                    <td><button type='button' id="insert" onclick='onAddPhone(this)' class='btn btn-default'><span class='glyphicon glyphicon-plus' />Insert</button></td>
+                </tr>
+                <tr>
+                    <td><label>Search field</label></td>
+                    <td><input id="searchField" type="text" /></td>
+                    <td><button type='button' id="search" onclick='searchPhones()' class='btn btn-default'><span class='glyphicon glyphicon-search' />Search</button></td>
+                </tr>
             </thead>
         </table>
+        <div class="btn-group" id="pageButtons">
+            <button type="button" class="btn btn-default" onclick="" id="previousPage"><span class='glyphicon glyphicon-triangle-left' /></button>
+            <button type="button" class="btn btn-default" onclick="" id="Page1">1</button>
+            <button type="button" class="btn btn-default" onclick="" id="nextPage"><span class='glyphicon glyphicon-triangle-right' /></button>
+        </div>
         <br />
         <div id="msg"></div>
     </form>
