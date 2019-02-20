@@ -34,13 +34,21 @@ namespace WebApp.Controllers
             return phones.Count;
         }
 
-        [Route("~/Phone/GetPhones")]
+        [Route("~/Phone/GetPhoneList")]
         [HttpGet]
-        public ICollection<Phone> GetPhones(int numberOfPage)
+        public ICollection<Phone> GetPhonesList(int numberOfPage)
         {
             List<Phone> phones = _unitOfWork._phoneRepository.GetPhonesByUserId(_unitOfWork._userManager.GetUserId(User));
             return phones.Skip(numberOfPage * 10 - 10).Take(10).ToList();
         }
+
+        //[Route("~/Phone/GetPhones")]
+        //[HttpGet]
+        //public ICollection<Phone> GetPhones(int numberOfPage)
+        //{
+        //    List<Phone> phones = _unitOfWork._phoneRepository.GetPhonesByUserId(_unitOfWork._userManager.GetUserId(User));
+        //    return phones.Skip(numberOfPage * 10 - 10).Take(10).ToList();
+        //}
 
         [HttpGet("{id}")]
         public RecepientModel Get(int id)

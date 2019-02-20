@@ -30,6 +30,21 @@ namespace WebApp.Controllers
             return View();
         }
 
+        [Route("~/Message/GetMessagesCount")]
+        public int GetMessagesCount()
+        {
+            List<Message> phones = _unitOfWork._messageRepository.GetMessagesBySenderId(_unitOfWork._userManager.GetUserId(User));
+            return phones.Count;
+        }
+
+        [Route("~/Phone/GetPhones")]
+        [HttpGet]
+        public List<Message> GetMessage(int numberOfMessage)
+        {
+            return _unitOfWork._messageRepository.GetMessagesBySenderId(_unitOfWork._userManager.GetUserId(User))
+                .Skip(numberOfMessage - 1).Take(1).ToList();
+        }
+
         [HttpGet]
         public ActionResult Messages()
         {

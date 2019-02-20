@@ -3,212 +3,278 @@
     ViewBag.Title = "Messages";
 }
 
-<style type="text/css" media="all">
+<html>
+<head>
+    @*<style type="text/css" media="all">
 
-    table {
-        font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
-        font-size: 14px;
-        border-radius: 10px;
-        border-spacing: 0;
-        text-align: center;
-    }
+            table {
+                font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+                font-size: 14px;
+                border-radius: 10px;
+                border-spacing: 0;
+                text-align: center;
+            }
 
-    th {
-        background: #BCEBDD;
-        color: white;
-        text-shadow: 0 1px 1px #2D2020;
-        padding: 10px 20px;
-    }
+            th {
+                background: #BCEBDD;
+                color: white;
+                text-shadow: 0 1px 1px #2D2020;
+                padding: 10px 20px;
+            }
 
-    th, td {
-        border-style: solid;
-        border-width: 0 1px 1px 0;
-        border-color: white;
-    }
+            th, td {
+                border-style: solid;
+                border-width: 0 1px 1px 0;
+                border-color: white;
+            }
 
-        th:first-child, td:first-child {
-            text-align: left;
-        }
+                th:first-child, td:first-child {
+                    text-align: left;
+                }
 
-        th:first-child {
-            border-top-left-radius: 10px;
-        }
+                th:first-child {
+                    border-top-left-radius: 10px;
+                }
 
-        th:last-child {
-            border-top-right-radius: 10px;
-            border-right: none;
-        }
+                th:last-child {
+                    border-top-right-radius: 10px;
+                    border-right: none;
+                }
 
-    td {
-        padding: 10px 20px;
-        background: #F8E391;
-    }
+            td {
+                padding: 10px 20px;
+                background: #F8E391;
+            }
 
-    tr:last-child td:first-child {
-        border-radius: 0 0 0 10px;
-    }
+            tr:last-child td:first-child {
+                border-radius: 0 0 0 10px;
+            }
 
-    tr:last-child td:last-child {
-        border-radius: 0 0 10px 0;
-    }
+            tr:last-child td:last-child {
+                border-radius: 0 0 10px 0;
+            }
 
-    tr td:last-child {
-        border-right: none;
-    }
-</style>
+            tr td:last-child {
+                border-right: none;
+            }
+        </style>*@
 
-<script type="text/javascript">
-    {
+    <script type="text/javascript">
         var phones = [];
-    }
-</script>
+        var messagesCount = 0;
+        var currentMessage = 1;
 
-<section>
-    <h4>Messages</h4>
-    <table style="display: inline-block;" border="1" id="messagesTable">
-        <tr>
-            <td><p>Text</p></td>
-            <td><p>Recepients</p></td>
-        </tr>
-        @foreach (var mes in ViewBag.MessagesWithRecipients)
-        {
-            <tr id="@mes.Message.MessageId">
-                <td><p>@mes.Message.TextOfMessage</p></td>
-                <td>
-                    <ul>
-                        @foreach (var phone in mes.Phones)
-                        {
-                            <li>@phone.PhoneNumber</li>
-                        }
-                    </ul>
-                </td>
-            </tr>
+        $(document).ready(GetMessagesData());
+
+        function GetMessagesData() {
+            getMessagesCount();
+            getMessagesList();
         }
-    </table>
 
-    <table align="right" style="display: inline-block;" border="1">
-        <tr>
-            <td>
-                <form id="Myform" style="display: inline-block;">
-                    <div id="recepient">
-                        Recepients
-                        <div class="form-group">
-                            <input asp-for="Recepients" class="form-control" type="text" id="recepientEditor">
-                            <span asp-validation-for="Recepients" id="alert" class="text-danger"></span>
-                        </div>
-                    </div>
 
-                    <div>
-                        <input type="button" class="btn btn-primary" onclick="AddRecepientFunc()" id="addRecepient" value="Add Recepient" />
-                    </div>
-                </form>
-            </td>
-        </tr>
-    </table>
-    <table align="right" style="display: inline-block;" border="1">
-        <tr>
-            <td>
-                <form id="Myform" style="display: inline-block;">
-                    <h4>AddNewMessage</h4>
 
-                    <div>
-                        TextOfMessage
-                        <div>
-                            <input type="text" class="form-control" id="messageEditor">
-                        </div>
-                    </div>
-
-                    <div>
-                        <div>
-                            <select multiple class="form-control" id="phones"></select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="btn-group">
-                            <input type="submit" class="btn btn-primary" onclick="SendMessage()" value="Add Message" id="sendMessage" />
-                            <input type="button" class="btn btn-primary" onclick="DeleteRecipientFunc()" id="deleteRecipient" value="Delete recipient" />
-                        </div>
-                    </div>
-                </form>
-            </td>
-        </tr>
-    </table>
-
-    <script type="text/javascript">
-        function AddRecepientFunc() {
-            var input = document.getElementById("recepientEditor")
-            var span = document.getElementById("alert");
-            span.textContent = "";
-            var re = new RegExp("^[+][0-9]{12}");
-            if (re.test(input.value)) {
-                phones.push(input.value);
-                var select = document.getElementById("phones");
-                var option = document.createElement("option");
-                option.text = input.value;
-                select.add(option);
-                //textarea.textContent += input.value + "\n";
-                input.value = "";
-            }
-            else {
-                span.textContent = "Wrong format of phone number";
-            }
+        var Message = {
+            id: 0,
+            TextOfMessage: "",
+            Recepients: phones
         }
-    </script>
 
-    <script type="text/javascript">
-        function DeleteRecipientFunc() {
-            var text = $("#phones option:selected").text();
-            for (var i = 0; i < phones.length; i++) {
-                if (phones[i] == text)
-                    phones.splice(i, 1);
-            }
-            $("#phones option:selected").remove();
-        }
-    </script>
-
-    <script type="text/javascript">
-        function SendMessage() {
-            var input = document.getElementById("messageEditor")
-            var Message = {};
-            Message.TextOfMessage = input.value;
-            Message.Recepients = phones;
-
-            var id;
+        function getMessagesCount() {
             $.ajax({
-                url: '/Message/Messages',
-                //contentType: 'application/json; charset=utf-8',
-                //dataType: 'json',
-                type: 'POST',
-                data: Message,
-                success: function (data)
-                {
-                    id = data;
+                url: '/Message/GetMessagesCount/',
+                type: 'GET',
+                success: function (count) {
+                    messagesCount = count;
+                    buildNavigationButtons();
                 },
-                error: function () {
-                    alert('error');
+                error: function (request, message, error) {
+                    handleException(request, message, error);
                 }
             });
+        }
 
-            var table = document.getElementById("messagesTable");
-            var tr = document.createElement("tr");
-            table.append(tr);
-            var tdformessage = document.createElement("td");
-            tr.append(tdformessage);
-            var p = document.createElement("p");
-            p.textContent = Message.TextOfMessage;
-            tdformessage.append(p);
-            var tdforphone = document.createElement("td");
-            tr.append(tdforphone);
-            var ul = document.createElement("ul");
-            tdforphone.append(ul);
-            for (var i = 0; i < Message.Recepients.length; i++) {
-                var li = document.createElement("li");
-                li.textContent = Message.Recepients[i];
-                ul.append(li);
+        // Get Message to display
+        function getMessage() {
+            // Call Web API to get a list of Phones
+            $.ajax({
+                url: '/Message/GetMessage/',
+                type: 'GET',
+                data: { numberOfPage: currentPage },
+                success: function (message) {
+                    getMessageSuccess(message);
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+
+        function getMessageSuccess(message) {
+            // Iterate over the collection of data
+            $("#messagesTable tbody").remove();
+            messageAddRow(message[0]);
+        }
+
+        // Add message row to <table>
+        function messageAddRow(message) {
+            // First check if a <tbody> tag exists, add one if not
+            if ($("#messagesTable tbody").length == 0) {
+                $("#messagesTable").append("<tbody></tbody>");
             }
 
+            // Append row to <table>
+            $("#messagesTable tbody").append(
+                messageBuildTableRow(phone));
         }
     </script>
-</section>
+</head>
+<body>
+    <section>
+        <h4>Messages</h4>
+        <table style="display: inline-block;" border="1" id="messagesTable">
+            <thead>
+                <tr>
+                    <td> Message </td>
+                    <td> Recepients </td>
+                    <td> </td>
+                    <td> </td>
+                </tr>
+                @*<tr>
+                        <td><input id="Message" type="text" /></td>
+                        <td><input id="" type="text" /></td>
+                        <td><button type='button' id="insert" onclick='onAddPhone(this)' class='btn btn-default'><span class='glyphicon glyphicon-plus' />Insert</button></td>
+                    </tr>*@
+                <tr>
+                    <td><label>Search field</label></td>
+                    <td><input id="searchField" type="text" /></td>
+                    <td><button type='button' id="search" onclick='searchMessage()' class='btn btn-default'><span class='glyphicon glyphicon-search' />Search</button></td>
+                </tr>
+            </thead>
+        </table>
 
+        <table align="right" style="display: inline-block;" border="1">
+            <tr>
+                <td>
+                    <form id="Myform" style="display: inline-block;">
+                        <div id="recepient">
+                            Recepients
+                            <div class="form-group">
+                                <input asp-for="Recepients" class="form-control" type="text" id="recepientEditor">
+                                <span asp-validation-for="Recepients" id="alert" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <input type="button" class="btn btn-primary" onclick="AddRecepientFunc()" id="addRecepient" value="Add Recepient" />
+                        </div>
+                    </form>
+                </td>
+            </tr>
+        </table>
+        <table align="right" style="display: inline-block;" border="1">
+            <tr>
+                <td>
+                    <form id="Myform" style="display: inline-block;">
+                        <h4>AddNewMessage</h4>
+
+                        <div>
+                            TextOfMessage
+                            <div>
+                                <input type="text" class="form-control" id="messageEditor">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div>
+                                <select multiple class="form-control" id="phones"></select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="btn-group">
+                                <input type="submit" class="btn btn-primary" onclick="SendMessage()" value="Add Message" id="sendMessage" />
+                                <input type="button" class="btn btn-primary" onclick="DeleteRecipientFunc()" id="deleteRecipient" value="Delete recipient" />
+                            </div>
+                        </div>
+                    </form>
+                </td>
+            </tr>
+        </table>
+
+        <script type="text/javascript">
+            function AddRecepientFunc() {
+                var input = document.getElementById("recepientEditor")
+                var span = document.getElementById("alert");
+                span.textContent = "";
+                var re = new RegExp("^[+][0-9]{12}");
+                if (re.test(input.value)) {
+                    phones.push(input.value);
+                    var select = document.getElementById("phones");
+                    var option = document.createElement("option");
+                    option.text = input.value;
+                    select.add(option);
+                    //textarea.textContent += input.value + "\n";
+                    input.value = "";
+                }
+                else {
+                    span.textContent = "Wrong format of phone number";
+                }
+            }
+        </script>
+
+        <script type="text/javascript">
+            function DeleteRecipientFunc() {
+                var text = $("#phones option:selected").text();
+                for (var i = 0; i < phones.length; i++) {
+                    if (phones[i] == text)
+                        phones.splice(i, 1);
+                }
+                $("#phones option:selected").remove();
+            }
+        </script>
+
+        <script type="text/javascript">
+            function SendMessage() {
+                var input = document.getElementById("messageEditor")
+                var Message = {};
+                Message.TextOfMessage = input.value;
+                Message.Recepients = phones;
+
+                var id;
+                $.ajax({
+                    url: '/Message/Messages',
+                    //contentType: 'application/json; charset=utf-8',
+                    //dataType: 'json',
+                    type: 'POST',
+                    data: Message,
+                    success: function (data) {
+                        id = data;
+                    },
+                    error: function () {
+                        alert('error');
+                    }
+                });
+
+                var table = document.getElementById("messagesTable");
+                var tr = document.createElement("tr");
+                table.append(tr);
+                var tdformessage = document.createElement("td");
+                tr.append(tdformessage);
+                var p = document.createElement("p");
+                p.textContent = Message.TextOfMessage;
+                tdformessage.append(p);
+                var tdforphone = document.createElement("td");
+                tr.append(tdforphone);
+                var ul = document.createElement("ul");
+                tdforphone.append(ul);
+                for (var i = 0; i < Message.Recepients.length; i++) {
+                    var li = document.createElement("li");
+                    li.textContent = Message.Recepients[i];
+                    ul.append(li);
+                }
+
+            }
+        </script>
+    </section>
+</body>
+</html>
