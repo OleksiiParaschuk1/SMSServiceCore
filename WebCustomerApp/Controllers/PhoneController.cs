@@ -28,7 +28,7 @@ namespace WebApp.Controllers
         }
 
         [Route("~/Phone/GetPhonesCount")]
-        public int GetPhonesCount()
+        public int GetPhonesCount() //coment
         {
             List<Phone> phones = _unitOfWork._phoneRepository.GetPhonesByUserId(_unitOfWork._userManager.GetUserId(User));
             return phones.Count;
